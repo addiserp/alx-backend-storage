@@ -3,24 +3,16 @@
     a Cache class. In the __init__ method, store an instance of the Redis
     client as a private variable named _redis
 """
-import sys
-from functools import wraps
-from typing import Union, Optional, Callable
-from uuid import uuid4
-
-import redis
-
-UnionOfTypes = Union[str, bytes, int, float]
 
 
 def count_calls(method: Callable) -> Callable:
     '''
-    It tracks the number of calls made to a method in a Cache class.
+    will track z no of calls made to a method in a Cache class.
     '''
     @wraps(method)
     def invoker(self, *args, **kwargs) -> Any:
         '''
-        It invokes the given method after incrementing its call counter.
+        to invoke the given method then incrementing its call counter.
         '''
         if isinstance(self._redis, redis.Redis):
             self._redis.incr(method.__qualname__)
@@ -30,12 +22,12 @@ def count_calls(method: Callable) -> Callable:
 
 def call_history(method: Callable) -> Callable:
     '''
-    It tracks the call details of a method in a Cache class.
+    will track the call details of a method in a class Cache.
     '''
     @wraps(method)
     def invoker(self, *args, **kwargs) -> Any:
         '''
-        It returns the method's output after storing its inputs and output.
+        this returns the method's output then storing its inputs and output.
         '''
         in_key = '{}:inputs'.format(method.__qualname__)
         out_key = '{}:outputs'.format(method.__qualname__)
@@ -50,7 +42,7 @@ def call_history(method: Callable) -> Callable:
 
 def replay(fn: Callable) -> None:
     '''
-    It displays the call history of a Cache class' method.
+    this displays the call history of the class Cache method.
     '''
     if fn is None or not hasattr(fn, '__self__'):
         return
@@ -76,11 +68,11 @@ def replay(fn: Callable) -> None:
 
 class Cache:
     '''
-    It represents an object for storing data in a Redis data storage.
+    to represent the object for storing data in a Redis storage data.
     '''
     def __init__(self) -> None:
         '''
-        It initializes a Cache instance.
+        will initializes at starting the Cache instance.
         '''
         self._redis = redis.Redis()
         self._redis.flushdb(True)
@@ -89,7 +81,7 @@ class Cache:
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         '''
-        It stores a value in a Redis data storage and returns the key.
+        will store the value in a Redis storage data and returns the key.
         '''
         data_key = str(uuid.uuid4())
         self._redis.set(data_key, data)
@@ -101,19 +93,19 @@ class Cache:
             fn: Callable = None,
             ) -> Union[str, bytes, int, float]:
         '''
-        It retrieves a value from a Redis data storage.
+        will retrieves a value from a Redis storage data.
         '''
         data = self._redis.get(key)
         return fn(data) if fn is not None else data
 
     def get_str(self, key: str) -> str:
         '''
-        It retrieves a string value from a Redis data storage.
+        will retrieve a string value from a Redis storage data.
         '''
         return self.get(key, lambda x: x.decode('utf-8'))
 
     def get_int(self, key: str) -> int:
         '''
-        It retrieves an integer value from a Redis data storage.
+        will retrieve an integer value from a Redis storage data.
         '''
         return self.get(key, lambda x: int(x))
